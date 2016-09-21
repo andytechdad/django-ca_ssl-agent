@@ -1,0 +1,22 @@
+api:
+  url: http://...
+  token: uachhf8uinf4hw893893uhd...
+csr:
+  ca: 1
+  cn: web01.server.example.com
+  san:
+    - 192.168.1.1
+    - www.example.com
+  subject:
+    c: UK
+    st: Cheshire
+    l: Stockport
+    o: CDL
+    ou: Strata Admin
+    emailaddress: strataadmin@cdl.co.uk
+certs:
+  path: certs
+  regen: 7
+logging:
+  path: logs
+  level: INFO

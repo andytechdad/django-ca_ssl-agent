@@ -1,6 +1,6 @@
 export GO15VENDOREXPERIMENT=1
 
-exe = github.com/aelsabbahy/devopsmakers/django-ca_ssl-agent
+exe = github.com/devopsmakers/django-ca_ssl-agent
 cmd = sslagent
 GO_FILES = $(shell find . \( -path ./vendor -o -name '_test.go' \) -prune -o -name '*.go' -print)
 

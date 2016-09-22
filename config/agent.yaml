@@ -2,11 +2,15 @@ api:
   url: http://...
   token: uachhf8uinf4hw893893uhd...
 csr:
+  algorithm: sha256
   ca: 1
   cn: web01.server.example.com
   san:
     - 192.168.1.1
     - www.example.com
+    - "*.somedomain.com"
+    - 10.21.123.141
+    - servername
   subject:
     c: UK
     st: Cheshire

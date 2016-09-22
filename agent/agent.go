@@ -1,18 +1,8 @@
 package agent
 
 import (
-  //"time"
-  "os"
-  //"encoding/gob"
-  "encoding/pem"
-  //"math/big"
-  "crypto/x509"
-  //"crypto/x509/pkix"
   "fmt"
-  "io/ioutil"
   "crypto/rsa"
-  "crypto/rand"
-
 	jww "github.com/spf13/jwalterweatherman"
 	"github.com/spf13/viper"
 )
@@ -48,84 +38,6 @@ func initLog(logfile string, loglevel string) {
   }
 }
 
-func checkKey(keypath string) (bool) {
-
-  keyfile, err := ioutil.ReadFile(keypath)
-  if err != nil {
-    jww.WARN.Println(err)
-    return false
-  }
-
-  key, _ := pem.Decode(keyfile)
-  if key == nil {
-    jww.ERROR.Println(keypath, "is not a valid PEM formatted key")
-    return false
-  }
-
-  if _, err := x509.ParsePKCS1PrivateKey(key.Bytes); err != nil {
-    jww.ERROR.Println(err)
-    return false
-  }
-
-  jww.INFO.Println("Valid key", keypath, "found")
-  return true
-}
-
-func newKey(keypath string) {
-
-  jww.WARN.Println("Creating new key", keypath)
-
-  privkey, err := rsa.GenerateKey(rand.Reader, 2048)
-  if err != nil {
-    jww.ERROR.Println(err)
-    os.Exit(1)
-  }
-
-  privkeyfile, err := os.Create(keypath)
-  if err != nil {
-    jww.ERROR.Println(err)
-    os.Exit(1)
-  }
-
-  var pemkey = &pem.Block{
-    Type : "RSA PRIVATE KEY",
-    Bytes : x509.MarshalPKCS1PrivateKey(privkey),
-  }
-  pem.Encode(privkeyfile, pemkey)
-  privkeyfile.Close()
-
-  jww.INFO.Println("Private key", keypath, "successfully created")
-}
-
-func checkCSR(csrpath string) (bool) {
-
-  csrfile, err := ioutil.ReadFile(csrpath)
-  if err != nil {
-    jww.WARN.Println(err)
-    return false
-  }
-
-  csr, _ := pem.Decode(csrfile)
-  if csr == nil {
-    jww.ERROR.Println(csrpath, "is not a valid PEM formatted CSR")
-    return false
-  }
-
-  return false
-}
-
-func newCSR(csrpath string) {
-
-}
-
-func checkCrt(crtpath string) (bool) {
-  return false
-}
-
-func newCrt(crtpath string) {
-
-}
-
 func Execute() {
   initConfig()
 
@@ -139,15 +51,21 @@ func Execute() {
   privkey := certpath + "/" + commonname + ".key"
   pubkey := certpath + "/" + commonname + ".crt"
   csr := certpath + "/" + commonname + ".csr"
+  algo := viper.GetString("csr.algorithm")
+  san := viper.GetStringSlice("csr.san")
+  subj := viper.GetStringMapString("csr.subject")
 
-  if checkKey(privkey) == false {
+  var keybytes *rsa.PrivateKey
+  var res bool
+  if res, keybytes = checkKey(privkey); res == false {
     //key is either corrupt or doesn't exist
-    newKey(privkey)
+    keybytes = newKey(privkey)
   }
+    configcsr := genCSR(commonname, algo, subj, san, keybytes)
 
-  if checkCSR(csr) == false {
+  if checkCSR(csr, configcsr) == false {
     //CSR is either not there or doesn't match the configuration
-    newCSR(csr)
+    newCSR(csr, configcsr)
   }
 
   if checkCrt(pubkey) {

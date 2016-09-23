@@ -22,6 +22,10 @@ func initConfig() {
 
   viper.SetDefault("logging.level", "INFO")
   viper.SetDefault("logging.path", "logs")
+  viper.SetDefault("csr.profile", "webserver")
+  viper.SetDefault("csr.algorithm", "sha256")
+  viper.SetDefault("certs.keybits", 2048)
+  viper.SetDefault("certs.regen", 7)
 }
 
 func initLog(logfile string, loglevel string) {
@@ -54,22 +58,28 @@ func Execute() {
   algo := viper.GetString("csr.algorithm")
   san := viper.GetStringSlice("csr.san")
   subj := viper.GetStringMapString("csr.subject")
+  keybits := viper.GetInt("certs.keybits")
+  regendays := viper.GetInt("certs.regen")
+  ca := viper.GetString("certs.ca")
+  url := viper.GetString("api.url")
+  authtoken := viper.GetString("api.token")
 
   var keybytes *rsa.PrivateKey
   var res bool
-  if res, keybytes = checkKey(privkey); res == false {
+  if res, keybytes = checkKey(privkey, keybits); res == false {
     //key is either corrupt or doesn't exist
-    keybytes = newKey(privkey)
+    keybytes = newKey(privkey, keybits)
   }
-    configcsr := genCSR(commonname, algo, subj, san, keybytes)
 
+  configcsr := genCSR(commonname, algo, subj, san, keybytes)
   if checkCSR(csr, configcsr) == false {
     //CSR is either not there or doesn't match the configuration
     newCSR(csr, configcsr)
   }
 
-  if checkCrt(pubkey) {
+  if checkCrt(pubkey, regendays, configcsr) == false {
     //crt is either invalid, expired or not there
-    newCrt(pubkey)
+    crtbytes := getCrt(url, authtoken, ca, algo, configcsr, subj, san)
+    newCrt(pubkey, crtbytes)
   }
 }

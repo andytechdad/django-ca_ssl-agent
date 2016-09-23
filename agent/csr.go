@@ -62,6 +62,11 @@ func checkCSR(csrpath string, confcsr []byte) (bool) {
     mismatch = true
   }
 
+  if !reflect.DeepEqual(csr.PublicKey, ccsr.PublicKey) {
+    jww.WARN.Println("CSR public key mismatch")
+    mismatch = true
+  }
+
   if mismatch {
     jww.ERROR.Println("CSR found does not match configuration, regenerating")
     return false

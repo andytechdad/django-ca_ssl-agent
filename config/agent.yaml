@@ -1,26 +1,28 @@
 api:
-  url: http://...
-  token: uachhf8uinf4hw893893uhd...
+  url: http://172.16.67.130:8000/django_ca/api/cert/
+  token: 	8e28a1074fb53a61cf2d0621339d57573743f03b
 csr:
   algorithm: sha256
-  ca: 1
   cn: web01.server.example.com
   san:
     - 192.168.1.1
     - www.example.com
     - "*.somedomain.com"
     - 10.21.123.141
+    - "*.new.domain"
     - servername
   subject:
-    c: UK
-    st: Cheshire
-    l: Stockport
-    o: CDL
-    ou: Strata Admin
-    emailaddress: strataadmin@cdl.co.uk
+    C: UK
+    ST: Cheshire
+    L: Stockport
+    O: CDL
+    OU: Strata Admin
+    emailAddress: strataadmin@cdl.co.uk
 certs:
+  ca: 1
+  keybits: 2048
   path: certs
   regen: 7
 logging:
   path: logs
-  level: INFO
+  level: WARN

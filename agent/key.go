@@ -61,6 +61,7 @@ func newKey(keypath string, keybits int) (*rsa.PrivateKey){
     jww.ERROR.Println(err)
     os.Exit(1)
   }
+  privkeyfile.Chmod(0640)
 
   var pemkey = &pem.Block{
     Type : "RSA PRIVATE KEY",

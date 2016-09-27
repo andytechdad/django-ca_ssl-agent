@@ -54,6 +54,7 @@ func Execute() {
   commonname := viper.GetString("csr.cn")
   privkey := certpath + "/" + commonname + ".key"
   pubkey := certpath + "/" + commonname + ".crt"
+  chain := certpath + "/"+ commonname + "_chain.crt"
   csr := certpath + "/" + commonname + ".csr"
   algo := viper.GetString("csr.algorithm")
   san := viper.GetStringSlice("csr.san")
@@ -79,7 +80,7 @@ func Execute() {
 
   if checkCrt(pubkey, regendays, configcsr) == false {
     //crt is either invalid, expired or not there
-    crtbytes := getCrt(url, authtoken, ca, algo, configcsr, subj, san)
-    newCrt(pubkey, crtbytes)
+    crtbytes, chainbytes := getCrt(url, authtoken, ca, algo, configcsr, subj, san)
+    newCrt(pubkey, chain, crtbytes, chainbytes)
   }
 }

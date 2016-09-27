@@ -109,7 +109,7 @@ func NewCSRData() *CSRData {
   return &d
 }
 
-func getCrt(url string, auth string, ca string, algo string, confcsr []byte, subject map[string]string, san []string) (interface{}) {
+func getCrt(url string, auth string, ca string, algo string, confcsr []byte, subject map[string]string, san []string) (interface{}, interface{}) {
   ccsr, _ := x509.ParseCertificateRequest(confcsr)
   var pemcsr = &pem.Block{
     Type : "CERTIFICATE REQUEST",
@@ -150,10 +150,10 @@ func getCrt(url string, auth string, ca string, algo string, confcsr []byte, sub
     os.Exit(1)
   }
 
-  return jsonbody["pub"]
+  return jsonbody["pub"], jsonbody["chain"]
 }
 
-func newCrt(crtpath string, crtbytes interface{}) {
+func newCrt(crtpath string, chainpath string, crtbytes interface{}, chainbytes interface{}) {
   jww.WARN.Println("Creating new certificate", crtpath)
 
   if str, ok := crtbytes.(string); ok {
@@ -180,6 +180,33 @@ func newCrt(crtpath string, crtbytes interface{}) {
 
   } else {
     jww.ERROR.Println("Certificate returned by API is not a valid PEM formatted certificate")
+    os.Exit(1)
+  }
+
+  if str, ok := chainbytes.(string); ok {
+
+    pemchain, _ := pem.Decode([]byte(str))
+    if pemchain == nil {
+      jww.ERROR.Println("Certificate returned by API is not a valid PEM formatted certificate")
+      os.Exit(1)
+    }
+
+    if _, err := x509.ParseCertificate(pemchain.Bytes); err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+
+    chainfile, err := os.Create(chainpath)
+    if err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+    pem.Encode(chainfile, pemchain)
+    chainfile.Close()
+    jww.INFO.Println("Chain certificate", chainpath, "successfully created")
+
+  } else {
+    jww.ERROR.Println("Chain certificate returned by API is not a valid PEM formatted certificate")
     os.Exit(1)
   }
 }

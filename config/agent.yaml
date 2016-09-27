@@ -1,6 +1,6 @@
 api:
   url: http://172.16.67.130:8000/django_ca/api/cert/
-  token: 	8e28a1074fb53a61cf2d0621339d57573743f03b
+  token: 	a3e95bd79f993ae86a28833ec638fe90645cf548
 csr:
   algorithm: sha256
   cn: web01.server.example.com
@@ -19,7 +19,7 @@ csr:
     OU: Strata Admin
     emailAddress: strataadmin@cdl.co.uk
 certs:
-  ca: 1
+  ca: 2
   keybits: 2048
   path: certs
   regen: 7

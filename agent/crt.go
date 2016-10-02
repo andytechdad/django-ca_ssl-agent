@@ -135,7 +135,11 @@ func getCrt(url string, auth string, ca string, algo string, confcsr []byte, sub
 	req.Header.Add("authorization", "Token " + auth)
 	req.Header.Add("cache-control", "no-cache")
 
-	res, _ := http.DefaultClient.Do(req)
+	res, err := http.DefaultClient.Do(req)
+  if err != nil {
+    jww.ERROR.Println(err)
+    os.Exit(1)
+  }
 
 	defer res.Body.Close()
 	body, _ := ioutil.ReadAll(res.Body)

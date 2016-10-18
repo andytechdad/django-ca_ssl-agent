@@ -157,7 +157,7 @@ func getCrt(url string, auth string, ca string, algo string, confcsr []byte, sub
   return jsonbody["pub"], jsonbody["chain"]
 }
 
-func newCrt(crtpath string, chainpath string, crtbytes interface{}, chainbytes interface{}) {
+func newCrt(crtpath string, chainpath string, bundlepath string, crtbytes interface{}, chainbytes interface{}) {
   jww.WARN.Println("Creating new certificate", crtpath)
 
   if str, ok := crtbytes.(string); ok {
@@ -209,8 +209,38 @@ func newCrt(crtpath string, chainpath string, crtbytes interface{}, chainbytes i
     chainfile.Close()
     jww.INFO.Println("Chain certificate", chainpath, "successfully created")
 
+    certfilecontent, err := ioutil.ReadFile(crtpath)
+    if err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+
+    bundle, err := os.Create(bundlepath)
+    if err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+    bundle.Close()
+
+    bundlefile, err := os.OpenFile(bundlepath, os.O_APPEND|os.O_WRONLY,0644)
+    if err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+    defer bundlefile.Close()
+
+    if _, err = bundlefile.Write(certfilecontent); err != nil {
+      jww.ERROR.Println(err)
+      os.Exit(1)
+    }
+    pem.Encode(bundlefile, pemchain)
+    jww.INFO.Println("Bundle certificate", bundlepath, "successfully created")
+
   } else {
     jww.ERROR.Println("Chain certificate returned by API is not a valid PEM formatted certificate")
     os.Exit(1)
   }
+
+
+
 }

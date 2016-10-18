@@ -1,6 +1,6 @@
 api:
   url: http://172.16.67.130:8000/django_ca/api/cert/
-  token: 	a3e95bd79f993ae86a28833ec638fe90645cf548
+  token: 7b51d4a3897add72c7231c7d75227e6f77e35a8e
 csr:
   algorithm: sha256
   cn: web01.server.example.com

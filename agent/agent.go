@@ -13,6 +13,7 @@ func initConfig() {
   viper.AddConfigPath("/etc/ca-agent/")
   viper.AddConfigPath("$HOME/.ca-agent/")
   viper.AddConfigPath("./config/")
+  viper.AddConfigPath("./config/")
   viper.AddConfigPath(".")
 
   err := viper.ReadInConfig()
@@ -52,9 +53,10 @@ func Execute() {
 
   certpath := viper.GetString("certs.path")
   commonname := viper.GetString("csr.cn")
-  privkey := certpath + "/" + commonname + ".key"
-  pubkey := certpath + "/" + commonname + ".crt"
-  chain := certpath + "/"+ commonname + "_chain.crt"
+  privkey := certpath + "/" + commonname + ".server.key"
+  pubkey := certpath + "/" + commonname + ".server.crt"
+  chain := certpath + "/"+ commonname + ".chain.crt"
+  bundle := certpath + "/"+ commonname + ".bundle.crt"
   csr := certpath + "/" + commonname + ".csr"
   algo := viper.GetString("csr.algorithm")
   san := viper.GetStringSlice("csr.san")
@@ -81,6 +83,6 @@ func Execute() {
   if checkCrt(pubkey, regendays, configcsr) == false {
     //crt is either invalid, expired or not there
     crtbytes, chainbytes := getCrt(url, authtoken, ca, algo, configcsr, subj, san)
-    newCrt(pubkey, chain, crtbytes, chainbytes)
+    newCrt(pubkey, chain, bundle, crtbytes, chainbytes)
   }
 }
